@@ -8,7 +8,7 @@ export default function PDFGenerator({ data }) {
     const loadLogo = async () => {
       return new Promise((resolve) => {
         const img = new Image();
-        img.src = "/logo.png";
+        img.src = "/public/logo.png";
         img.onload = () => resolve(img);
       });
     };
