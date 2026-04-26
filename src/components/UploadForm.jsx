@@ -74,6 +74,14 @@ export default function UploadForm({ setData }) {
             placeholder="Add note"
             value={notes[index]}
             onChange={(e) => handleNoteChange(index, e.target.value)}
+            rows={3}
+            style={{
+              width: "100%",
+              padding: "8px",
+              fontFamily: "Arial",
+              fontSize: "14px",
+              resize: "vertical"
+        }}
           />
         </div>
       ))}

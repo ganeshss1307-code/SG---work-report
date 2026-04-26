@@ -100,9 +100,24 @@ export default function PDFGenerator({ data }) {
       pdf.addImage(imgData, "JPEG", 15, yStart, imgWidth, imgHeight);
 
       pdf.setFontSize(12);
+      pdf.setFont("helvetica", "normal"); // Arial-like font
+      pdf.setFontSize(11);
+
+    // Wrap text properly
       const splitText = pdf.splitTextToSize(note || "", 180);
 
-      pdf.text(splitText, 15, yStart + imgHeight + 15);
+    // Calculate safe Y position
+      let textY = yStart + imgHeight + 15;
+
+    // Prevent overflow (if near page bottom)
+      if (textY > 260) {
+      pdf.addPage();
+      addHeader();
+      textY = 40;
+    }
+
+    // Add text
+      pdf.text(splitText, 15, textY);
 
       pdf.setDrawColor(230);
       pdf.line(15, yStart + imgHeight + 30, 195, yStart + imgHeight + 30);

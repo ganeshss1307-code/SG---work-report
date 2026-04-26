@@ -56,7 +56,7 @@ export default function Preview({ data }) {
               }}
             />
 
-            <p style={{ fontSize: "14px", color: "#333", lineHeight: "1.5" }}>
+            <p style={{ fontSize: "14px", color: "#333", lineHeight: "1.5", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
               {data.notes[index]}
             </p>
           </div>
