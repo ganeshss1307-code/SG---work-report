@@ -4,20 +4,30 @@ export default function PDFGenerator({ data }) {
   const downloadPDF = async () => {
     const pdf = new jsPDF("p", "mm", "a4");
 
-    // 🔹 Load Logo
+    // 🔹 Load Logo as base64
     const loadLogo = async () => {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         const img = new Image();
-        img.src = "/public/logo.png";
-        img.onload = () => resolve(img);
+        img.crossOrigin = "anonymous";
+        img.src = "/logo.png";
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          const dataURL = canvas.toDataURL("image/png");
+          resolve(dataURL);
+        };
+        img.onerror = reject;
       });
     };
 
     const logo = await loadLogo();
 
     // 🔹 Header
-    const addHeader = () => {
-      pdf.addImage(logo, "PNG", 15, 8, 20, 20);
+    const addHeader = (logoData) => {
+      pdf.addImage(logoData, "PNG", 15, 8, 20, 20);
 
       pdf.setFontSize(12);
       pdf.setFont(undefined, "bold");
@@ -58,7 +68,7 @@ export default function PDFGenerator({ data }) {
     for (let i = 0; i < data.images.length; i++) {
       pdf.addPage();
 
-      addHeader();
+      addHeader(logo);
 
       pdf.setFontSize(10);
       pdf.setTextColor(120);
@@ -69,11 +79,16 @@ export default function PDFGenerator({ data }) {
       const img = data.images[i];
       const note = data.notes[i];
 
-      const imgURL = URL.createObjectURL(img);
+      // Convert image to base64
+      const imgData = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(img);
+      });
 
       const image = await new Promise((resolve) => {
         const imgObj = new Image();
-        imgObj.src = imgURL;
+        imgObj.src = imgData;
         imgObj.onload = () => resolve(imgObj);
       });
 
@@ -82,7 +97,7 @@ export default function PDFGenerator({ data }) {
 
       let yStart = 45;
 
-      pdf.addImage(imgURL, "JPEG", 15, yStart, imgWidth, imgHeight);
+      pdf.addImage(imgData, "JPEG", 15, yStart, imgWidth, imgHeight);
 
       pdf.setFontSize(12);
       const splitText = pdf.splitTextToSize(note || "", 180);
@@ -99,7 +114,7 @@ export default function PDFGenerator({ data }) {
     // 🔹 SIGNATURE PAGE
     pdf.addPage();
 
-    addHeader();
+    addHeader(logo);
 
     pdf.setFontSize(14);
     pdf.setFont(undefined, "bold");
